@@ -200,7 +200,11 @@ final class NotifierCompilerPass implements CompilerPassInterface
         foreach ($classToServices as $class => $service) {
             $package = substr($service, \strlen('notifier.transport_factory.'));
 
-            if (! ContainerBuilder::willBeAvailable(sprintf('symfony/%s-notifier', $package), $class, $parentPackages)) {
+            if (! ContainerBuilder::willBeAvailable(
+                sprintf('symfony/%s-notifier', $package),
+                $class,
+                $parentPackages
+            )) {
                 $container->removeDefinition($service);
             }
         }

@@ -9,6 +9,7 @@ declare(strict_types=1);
  * LICENSE.txt file that was distributed with this source code.
  */
 
+use Ssch\T3Notifier\Channel\BrowserChannel;
 use Ssch\T3Notifier\DependencyInjection\Compiler\NotifierCompilerPass;
 use Ssch\T3Notifier\DependencyInjection\NotifierConfigurationResolver;
 use Ssch\T3Notifier\Mailer\Factory\TransportFactory;
@@ -39,15 +40,19 @@ use Symfony\Component\Notifier\TexterInterface;
 use Symfony\Component\Notifier\Transport;
 use Symfony\Component\Notifier\Transport\Transports;
 
-return static function (ContainerConfigurator $container, ContainerBuilder $containerBuilder): void {
-    $services = $container->services();
+return static function (ContainerConfigurator $containerConfigurator, ContainerBuilder $containerBuilder): void {
+    $services = $containerConfigurator->services();
     $services->defaults()
         ->private()
         ->autowire()
         ->autoconfigure();
 
+    // Test configuration ignore
+    $containerConfigurator->import(__DIR__ . '/../Classes/Test/Configuration/Services.php', null, true);
+
     $services->load('Ssch\\T3Notifier\\', __DIR__ . '/../Classes/')->exclude([
         __DIR__ . '/../Classes/DependencyInjection',
+        __DIR__ . '/../Classes/Test',
     ]);
 
     $services->set('notifier.mailer.transport', TransportInterface::class)
@@ -62,6 +67,11 @@ return static function (ContainerConfigurator $container, ContainerBuilder $cont
 
         ->set('notifier.channel_policy', ChannelPolicy::class)
         ->args([[]])
+
+        ->set('notifier.channel.browser', BrowserChannel::class)
+        ->tag('notifier.channel', [
+            'channel' => 'browser',
+        ])
 
         ->set('notifier.channel.chat', ChatChannel::class)
         ->args([service('chatter.transports'), service('messenger.default_bus')->ignoreOnInvalid()])
@@ -148,7 +158,7 @@ return static function (ContainerConfigurator $container, ContainerBuilder $cont
         ->tag('kernel.event_subscriber')
     ;
 
-    $container->import(__DIR__ . '/Services/Transports.php');
+    $containerConfigurator->import(__DIR__ . '/Services/Transports.php');
 
     $containerBuilder->addCompilerPass(new NotifierCompilerPass(new NotifierConfigurationResolver()));
 };
