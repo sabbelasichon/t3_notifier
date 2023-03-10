@@ -76,6 +76,7 @@ use Symfony\Component\Notifier\Transport\TransportFactoryInterface;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Package\PackageManager;
+use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class NotifierCompilerPass implements CompilerPassInterface
@@ -110,26 +111,27 @@ final class NotifierCompilerPass implements CompilerPassInterface
             $container->removeAlias(TexterInterface::class);
         }
 
-        //        if ($this->isInitializedConfigEnabled('mailer')) {
-        //            $sender = $container->getDefinition('mailer.envelope_listener')->getArgument(0);
-        //            $container->getDefinition('notifier.channel.email')->setArgument(2, $sender);
-        //        } else {
-        //            $container->removeDefinition('notifier.channel.email');
-        //        }
+        //        $sender = $container->getDefinition('mailer.envelope_listener')->getArgument(0);
+        //        $container->getDefinition('notifier.channel.email')->setArgument(2, $sender);
 
-        //        if ($this->isInitializedConfigEnabled('messenger')) {
-        //            if ($config['notification_on_failed_messages']) {
-        //                $container->getDefinition('notifier.failed_message_listener')->addTag('kernel.event_subscriber');
-        //            }
-        //
-        //            // as we have a bus, the channels don't need the transports
-        //            $container->getDefinition('notifier.channel.chat')->setArgument(0, null);
-        //            if ($container->hasDefinition('notifier.channel.email')) {
-        //                $container->getDefinition('notifier.channel.email')->setArgument(0, null);
-        //            }
-        //            $container->getDefinition('notifier.channel.sms')->setArgument(0, null);
-        //            $container->getDefinition('notifier.channel.push')->setArgument(0, null);
-        //        }
+        if (ExtensionManagementUtility::isLoaded('t3_messenger')) {
+            if ($config['notification_on_failed_messages']) {
+                $container->getDefinition('notifier.failed_message_listener')
+                    ->addTag('kernel.event_subscriber');
+            }
+
+            // as we have a bus, the channels don't need the transports
+            $container->getDefinition('notifier.channel.chat')
+                ->setArgument(0, null);
+            if ($container->hasDefinition('notifier.channel.email')) {
+                $container->getDefinition('notifier.channel.email')
+                    ->setArgument(0, null);
+            }
+            $container->getDefinition('notifier.channel.sms')
+                ->setArgument(0, null);
+            $container->getDefinition('notifier.channel.push')
+                ->setArgument(0, null);
+        }
 
         $container->getDefinition('notifier.channel_policy')
             ->setArgument(0, $config['channel_policy']);
@@ -195,26 +197,12 @@ final class NotifierCompilerPass implements CompilerPassInterface
             ZulipTransportFactory::class => 'notifier.transport_factory.zulip',
         ];
 
-        $parentPackages = ['symfony/framework-bundle', 'symfony/notifier'];
-
         foreach ($classToServices as $class => $service) {
-            $package = substr($service, \strlen('notifier.transport_factory.'));
-
-            if (! ContainerBuilder::willBeAvailable(
-                sprintf('symfony/%s-notifier', $package),
-                $class,
-                $parentPackages
-            )) {
+            if (! class_exists($class)) {
                 $container->removeDefinition($service);
             }
         }
 
-        //        if (ContainerBuilder::willBeAvailable('symfony/mercure-notifier', MercureTransportFactory::class, $parentPackages) && ContainerBuilder::willBeAvailable('symfony/mercure-bundle', MercureBundle::class, $parentPackages) && \in_array(MercureBundle::class, $container->getParameter('kernel.bundles'), true)) {
-        //            $container->getDefinition($classToServices[MercureTransportFactory::class])
-        //                      ->replaceArgument('$registry', new Reference(HubRegistry::class));
-        //        } elseif (ContainerBuilder::willBeAvailable('symfony/mercure-notifier', MercureTransportFactory::class, $parentPackages)) {
-        //            $container->removeDefinition($classToServices[MercureTransportFactory::class]);
-        //        }
         //
         //        if (ContainerBuilder::willBeAvailable('symfony/fake-chat-notifier', FakeChatTransportFactory::class, ['symfony/framework-bundle', 'symfony/notifier', 'symfony/mailer'])) {
         //            $container->getDefinition($classToServices[FakeChatTransportFactory::class])
@@ -241,7 +229,7 @@ final class NotifierCompilerPass implements CompilerPassInterface
         }
     }
 
-    private function collectNotifierConfigurationsFromPackages()
+    private function collectNotifierConfigurationsFromPackages(): array
     {
         $versionInformation = GeneralUtility::makeInstance(Typo3Version::class);
         if ($versionInformation->getMajorVersion() >= 11) {
@@ -254,6 +242,7 @@ final class NotifierCompilerPass implements CompilerPassInterface
         }
 
         $config = (new NotifierConfigurationCollector($packageManager))->collect();
+
         return $this->notifierConfigurationResolver->resolve($config->getArrayCopy());
     }
 }

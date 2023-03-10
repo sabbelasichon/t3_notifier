@@ -12,6 +12,7 @@ declare(strict_types=1);
 namespace Ssch\T3Notifier\DependencyInjection;
 
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class NotifierConfigurationResolver
 {
@@ -26,20 +27,25 @@ final class NotifierConfigurationResolver
     private function configureDefaultOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefault('notification_on_failed_messages', false);
+        $resolver->setDefault('chatter_transports', []);
+        $resolver->setDefault('texter_transports', []);
+        $resolver->setDefault('channel_policy', []);
         $resolver->setAllowedTypes('notification_on_failed_messages', 'bool');
 
-        $resolver->setDefault('chatter_transports', function (OptionsResolver $resolver) {
-            $resolver
-                ->setPrototype(true);
+        $resolver->setDefault('admin_recipients', function (OptionsResolver $adminRecipientsResolver) {
+            $adminRecipientsResolver->setPrototype(true)
+                ->setRequired('email')
+                ->setAllowedValues('email', function ($email) {
+                    if ($email === null) {
+                        return false;
+                    }
+                    if ($email === '') {
+                        return false;
+                    }
+
+                    return GeneralUtility::validEmail($email);
+                })
+                ->setDefault('phone', '');
         });
-        $resolver->setDefault('texter_transports', function (OptionsResolver $resolver) {
-            $resolver
-                ->setPrototype(true);
-        });
-        $resolver->setDefault('channel_policy', function (OptionsResolver $resolver) {
-            $resolver
-                ->setPrototype(true);
-        });
-        // admin_recipients
     }
 }

@@ -47,7 +47,9 @@ final class BrowserChannel implements ChannelInterface
         $severity = self::MAP_NOTIFICATION_IMPORTANCE[$notification->getImportance()] ?? FlashMessage::INFO;
 
         $this->flashMessageService->getMessageQueueByIdentifier('notifier.template.flashMessages')
-            ->addMessage(GeneralUtility::makeInstance(FlashMessage::class, $message, $notification->getContent(), $severity));
+            ->addMessage(
+                GeneralUtility::makeInstance(FlashMessage::class, $message, $notification->getContent(), $severity)
+            );
     }
 
     public function supports(Notification $notification, RecipientInterface $recipient): bool
