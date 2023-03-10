@@ -6,5 +6,5 @@ composer.lock
 var
 Tests/Build/.phpunit.result.cache
 config
-Configuration/Messenger.php
+Configuration/Notifier.php
 Classes/Test
