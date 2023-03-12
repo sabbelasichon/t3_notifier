@@ -9,5 +9,6 @@ parameters:
   excludePaths:
     analyse:
       -  Configuration/Services/Transports.php
+      -  Configuration/Services.php
       -  Classes/DependencyInjection/Compiler/NotifierCompilerPass.php
       -  Tests/Functional/Fixtures/Extensions/*
