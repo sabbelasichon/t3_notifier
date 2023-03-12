@@ -1,0 +1,17 @@
+{
+  "name": "ssch/t3-notifier-test",
+  "type": "typo3-cms-extension",
+  "description": "Test extension for t3_notifier",
+  "license": "GPL-2.0+",
+  "require": {
+    "ssch/t3-notifier": "*"
+  },
+  "autoload": {
+    "Ssch\\T3NotifierTest\\": "Classes"
+  },
+  "extra": {
+    "typo3/cms": {
+      "extension-key": "t3_notifier_test"
+    }
+  }
+}

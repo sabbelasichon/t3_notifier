@@ -13,21 +13,33 @@ namespace Ssch\T3Notifier\Logger\Writer;
 
 use Symfony\Component\Notifier\Notification\Notification;
 use Symfony\Component\Notifier\NotifierInterface;
+use Symfony\Component\Notifier\Recipient\RecipientInterface;
 use TYPO3\CMS\Core\Log\LogRecord;
-use TYPO3\CMS\Core\Log\Writer\AbstractWriter;
+use TYPO3\CMS\Core\Log\Writer\WriterInterface;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
-final class NotifierWriter extends AbstractWriter
+final class NotifierWriter implements WriterInterface
 {
+    /**
+     * @var string[]
+     */
+    private array $channels;
+
+    /**
+     * @var RecipientInterface[]
+     */
+    private array $recipients;
+
     private NotifierInterface $notifier;
 
     /**
-     * @param array<mixed> $options
+     * @param array{"channels"?: string[], "recipients"?: RecipientInterface[]} $options
      */
     public function __construct(array $options = [], NotifierInterface $notifier = null)
     {
         $this->notifier = $notifier ?? GeneralUtility::getContainer()->get('notifier');
-        parent::__construct($options);
+        $this->channels = $options['channels'] ?? [];
+        $this->recipients = $options['recipients'] ?? [];
     }
 
     public function writeLog(LogRecord $record)
@@ -46,8 +58,10 @@ final class NotifierWriter extends AbstractWriter
 
         $notification->importanceFromLogLevelName($record->getLevel());
 
-        $recipients = [];
-        if (method_exists($this->notifier, 'getAdminRecipients')) {
+        $notification->channels($this->channels);
+
+        $recipients = $this->recipients;
+        if ($recipients === [] && method_exists($this->notifier, 'getAdminRecipients')) {
             $recipients = $this->notifier->getAdminRecipients();
         }
 

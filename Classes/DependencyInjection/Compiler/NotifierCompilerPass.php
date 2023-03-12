@@ -242,6 +242,7 @@ final class NotifierCompilerPass implements CompilerPassInterface
             $coreCache = Bootstrap::createCache('core');
             $packageManager = Bootstrap::createPackageManager(PackageManager::class, $coreCache);
         }
+        ExtensionManagementUtility::setPackageManager($packageManager);
 
         $config = (new NotifierConfigurationCollector($packageManager))->collect();
 

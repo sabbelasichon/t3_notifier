@@ -13,11 +13,14 @@ use Ssch\T3Notifier\Channel\BrowserChannel;
 use Ssch\T3Notifier\DependencyInjection\Compiler\NotifierCompilerPass;
 use Ssch\T3Notifier\DependencyInjection\NotifierConfigurationResolver;
 use Ssch\T3Notifier\Mailer\Factory\TransportFactory;
+use Symfony\Component\Console\ConsoleEvents;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_iterator;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_locator;
+use Symfony\Component\EventDispatcher\DependencyInjection\RegisterListenersPass;
 use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Notifier\Channel\ChannelPolicy;
@@ -44,7 +47,7 @@ use TYPO3\CMS\Core\Mail\Mailer;
 return static function (ContainerConfigurator $containerConfigurator, ContainerBuilder $containerBuilder): void {
     $services = $containerConfigurator->services();
     $services->defaults()
-        ->private()
+        ->public()
         ->autowire()
         ->autoconfigure();
 
@@ -69,7 +72,6 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
 
     $services->set('notifier', Notifier::class)
         ->args([tagged_locator('notifier.channel', 'channel'), service('notifier.channel_policy')->ignoreOnInvalid()])
-
         ->alias(NotifierInterface::class, 'notifier')
 
         ->set('notifier.channel_policy', ChannelPolicy::class)
@@ -167,5 +169,18 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
 
     $containerConfigurator->import(__DIR__ . '/Services/Transports.php');
 
+    // Compiler passes
+    $registerListenersPass = new RegisterListenersPass();
+    if (class_exists(ConsoleEvents::class) && method_exists($registerListenersPass, 'setNoPreloadEvents')) {
+        $registerListenersPass->setNoPreloadEvents([
+            ConsoleEvents::COMMAND,
+            ConsoleEvents::TERMINATE,
+            ConsoleEvents::ERROR,
+        ]);
+    }
+
+    // must be registered before removing private services as some might be listeners/subscribers
+    // but as late as possible to get resolved parameters
+    $containerBuilder->addCompilerPass($registerListenersPass, PassConfig::TYPE_BEFORE_REMOVING);
     $containerBuilder->addCompilerPass(new NotifierCompilerPass(new NotifierConfigurationResolver()));
 };
