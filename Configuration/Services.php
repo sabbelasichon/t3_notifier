@@ -39,6 +39,7 @@ use Symfony\Component\Notifier\Texter;
 use Symfony\Component\Notifier\TexterInterface;
 use Symfony\Component\Notifier\Transport;
 use Symfony\Component\Notifier\Transport\Transports;
+use TYPO3\CMS\Core\Mail\Mailer;
 
 return static function (ContainerConfigurator $containerConfigurator, ContainerBuilder $containerBuilder): void {
     $services = $containerConfigurator->services();
@@ -59,6 +60,12 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
         ->factory([service(TransportFactory::class), 'get']);
 
     $services->set('event_dispatcher', EventDispatcher::class);
+
+    if (interface_exists(\TYPO3\CMS\Core\Mail\MailerInterface::class)) {
+        $services->set('mailer', \TYPO3\CMS\Core\Mail\MailerInterface::class);
+    } else {
+        $services->set('mailer', Mailer::class);
+    }
 
     $services->set('notifier', Notifier::class)
         ->args([tagged_locator('notifier.channel', 'channel'), service('notifier.channel_policy')->ignoreOnInvalid()])

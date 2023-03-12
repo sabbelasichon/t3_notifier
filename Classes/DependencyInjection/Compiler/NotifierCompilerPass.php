@@ -75,9 +75,12 @@ use Symfony\Component\Notifier\TexterInterface;
 use Symfony\Component\Notifier\Transport\TransportFactoryInterface;
 use TYPO3\CMS\Core\Core\Bootstrap;
 use TYPO3\CMS\Core\Information\Typo3Version;
+use TYPO3\CMS\Core\Log\Logger;
+use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Package\PackageManager;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Core\Utility\MailUtility;
 
 final class NotifierCompilerPass implements CompilerPassInterface
 {
@@ -111,8 +114,8 @@ final class NotifierCompilerPass implements CompilerPassInterface
             $container->removeAlias(TexterInterface::class);
         }
 
-        //        $sender = $container->getDefinition('mailer.envelope_listener')->getArgument(0);
-        //        $container->getDefinition('notifier.channel.email')->setArgument(2, $sender);
+        $container->getDefinition('notifier.channel.email')
+            ->setArgument(2, MailUtility::getSystemFromAddress());
 
         if (ExtensionManagementUtility::isLoaded('t3_messenger')) {
             if ($config['notification_on_failed_messages']) {
@@ -203,18 +206,17 @@ final class NotifierCompilerPass implements CompilerPassInterface
             }
         }
 
-        //
-        //        if (ContainerBuilder::willBeAvailable('symfony/fake-chat-notifier', FakeChatTransportFactory::class, ['symfony/framework-bundle', 'symfony/notifier', 'symfony/mailer'])) {
-        //            $container->getDefinition($classToServices[FakeChatTransportFactory::class])
-        //                      ->replaceArgument('$mailer', new Reference('mailer'))
-        //                      ->replaceArgument('$logger', new Reference('logger'));
-        //        }
-        //
-        //        if (ContainerBuilder::willBeAvailable('symfony/fake-sms-notifier', FakeSmsTransportFactory::class, ['symfony/framework-bundle', 'symfony/notifier', 'symfony/mailer'])) {
-        //            $container->getDefinition($classToServices[FakeSmsTransportFactory::class])
-        //                      ->replaceArgument('$mailer', new Reference('mailer'))
-        //                      ->replaceArgument('$logger', new Reference('logger'));
-        //        }
+        if (class_exists(FakeChatTransportFactory::class)) {
+            $container->getDefinition($classToServices[FakeChatTransportFactory::class])
+                ->replaceArgument('$mailer', new Reference('mailer'))
+                ->replaceArgument('$logger', $this->createLogger(FakeChatTransportFactory::class));
+        }
+
+        if (class_exists(FakeSmsTransportFactory::class)) {
+            $container->getDefinition($classToServices[FakeSmsTransportFactory::class])
+                ->replaceArgument('$mailer', new Reference('mailer'))
+                ->replaceArgument('$logger', $this->createLogger(FakeSmsTransportFactory::class));
+        }
 
         if (isset($config['admin_recipients'])) {
             $notifier = $container->getDefinition('notifier');
@@ -244,5 +246,18 @@ final class NotifierCompilerPass implements CompilerPassInterface
         $config = (new NotifierConfigurationCollector($packageManager))->collect();
 
         return $this->notifierConfigurationResolver->resolve($config->getArrayCopy());
+    }
+
+    /**
+     * @param class-string $className
+     */
+    private function createLogger(string $className): Definition
+    {
+        $logger = new Definition(Logger::class);
+        $logger->setFactory([new Reference(LogManager::class), 'getLogger']);
+        $logger->setArguments([$className]);
+        $logger->setShared(false);
+
+        return $logger;
     }
 }
