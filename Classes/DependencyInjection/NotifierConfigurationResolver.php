@@ -16,6 +16,11 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class NotifierConfigurationResolver
 {
+    /**
+     * @param array<mixed> $configuration
+     *
+     * @return array<mixed>
+     */
     public function resolve(array $configuration): array
     {
         $resolver = new OptionsResolver();

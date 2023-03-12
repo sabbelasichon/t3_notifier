@@ -91,7 +91,7 @@ final class NotifierCompilerPass implements CompilerPassInterface
         $this->notifierConfigurationResolver = $notifierConfigurationResolver;
     }
 
-    public function process(ContainerBuilder $container)
+    public function process(ContainerBuilder $container): void
     {
         $config = $this->collectNotifierConfigurationsFromPackages();
 

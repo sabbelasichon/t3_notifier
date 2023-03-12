@@ -21,6 +21,9 @@ final class NotifierWriter extends AbstractWriter
 {
     private NotifierInterface $notifier;
 
+    /**
+     * @param array<mixed> $options
+     */
     public function __construct(array $options = [], NotifierInterface $notifier = null)
     {
         $this->notifier = $notifier ?? GeneralUtility::getContainer()->get('notifier');
@@ -43,7 +46,12 @@ final class NotifierWriter extends AbstractWriter
 
         $notification->importanceFromLogLevelName($record->getLevel());
 
-        $this->notifier->send($notification, ...$this->notifier->getAdminRecipients());
+        $recipients = [];
+        if (method_exists($this->notifier, 'getAdminRecipients')) {
+            $recipients = $this->notifier->getAdminRecipients();
+        }
+
+        $this->notifier->send($notification, ...$recipients);
 
         return $this;
     }

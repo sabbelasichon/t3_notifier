@@ -12,7 +12,6 @@ declare(strict_types=1);
 namespace Ssch\T3Notifier\Mailer\Notification;
 
 use Symfony\Component\Mime\Address;
-use Symfony\Component\Mime\Email;
 use Symfony\Component\Notifier\Exception\InvalidArgumentException;
 use Symfony\Component\Notifier\Message\EmailMessage;
 use Symfony\Component\Notifier\Notification\EmailNotificationInterface;
@@ -31,49 +30,53 @@ final class EmailNotification extends Notification implements EmailNotificationI
             throw new InvalidArgumentException(sprintf('"%s" needs an email, it cannot be empty.', __CLASS__));
         }
 
+        if ($this->getContent() !== '') {
+            $body = $this->getContent();
+        } else {
+            $body = $this->getSubject();
+        }
+
         if (! class_exists(FluidEmail::class)) {
             $email = GeneralUtility::makeInstance(MailMessage::class);
             $email->to($recipient->getEmail())
                 ->subject($this->getSubject())
-                ->text($this->getContent() ?: $this->getSubject())
+                ->text($body)
             ;
         } else {
             $email = GeneralUtility::makeInstance(FluidEmail::class);
             $email
                 ->assignMultiple([
                     'headline' => $this->getSubject(),
-                    'introduction' => $this->getContent() ?: $this->getSubject(),
+                    'introduction' => $body,
                 ])
                 ->to($recipient->getEmail())
                 ->subject($this->getSubject())
-                ->text($this->getContent() ?: $this->getSubject());
+                ->text($body);
         }
 
-        if ($email instanceof Email) {
-            // Ensure to always have a From: header set
-            if ($email->getFrom() === []) {
-                $address = MailUtility::getSystemFromAddress();
-                if ($address) {
-                    $name = MailUtility::getSystemFromName();
-                    if ($name) {
-                        $from = new Address($address, $name);
-                    } else {
-                        $from = new Address($address);
-                    }
-                    $email->from($from);
+        // Ensure to always have a From: header set
+        if ($email->getFrom() === []) {
+            $address = MailUtility::getSystemFromAddress();
+            if ($address !== '') {
+                $name = MailUtility::getSystemFromName();
+                if (is_string($name) && $name !== '') {
+                    $from = new Address($address, $name);
+                } else {
+                    $from = new Address($address);
                 }
+                $email->from($from);
             }
-            if ($email->getReplyTo() === []) {
-                $replyTo = MailUtility::getSystemReplyTo();
-                if ($replyTo !== []) {
-                    $address = key($replyTo);
-                    if ($address === 0) {
-                        $replyTo = new Address($replyTo[$address]);
-                    } else {
-                        $replyTo = new Address((string) $address, reset($replyTo));
-                    }
-                    $email->replyTo($replyTo);
+        }
+        if ($email->getReplyTo() === []) {
+            $replyTo = MailUtility::getSystemReplyTo();
+            if ($replyTo !== []) {
+                $address = key($replyTo);
+                if ($address === 0) {
+                    $replyTo = new Address($replyTo[$address]);
+                } else {
+                    $replyTo = new Address((string) $address, reset($replyTo));
                 }
+                $email->replyTo($replyTo);
             }
         }
 

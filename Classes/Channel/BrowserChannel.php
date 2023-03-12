@@ -40,7 +40,7 @@ final class BrowserChannel implements ChannelInterface
         string $transportName = null
     ): void {
         $message = $notification->getSubject();
-        if ($notification->getEmoji()) {
+        if ($notification->getEmoji() !== '') {
             $message = $notification->getEmoji() . ' ' . $message;
         }
 
