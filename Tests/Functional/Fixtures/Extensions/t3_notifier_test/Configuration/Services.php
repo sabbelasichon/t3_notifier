@@ -9,6 +9,7 @@ declare(strict_types=1);
  * LICENSE.txt file that was distributed with this source code.
  */
 
+use Ssch\T3Notifier\Tests\Functional\Fixtures\Extensions\t3_notifier_test\Classes\BrowserChannelService;
 use Ssch\T3Notifier\Tests\Functional\Fixtures\Extensions\t3_notifier_test\Classes\LoggerService;
 use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 
@@ -19,4 +20,5 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         ->autoconfigure();
 
     $services->set(LoggerService::class)->public();
+    $services->set(BrowserChannelService::class)->public();
 };

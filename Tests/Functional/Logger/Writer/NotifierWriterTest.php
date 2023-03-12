@@ -35,7 +35,7 @@ final class NotifierWriterTest extends FunctionalTestCase
         $this->notificationLoggerListener = $this->get('notifier.logger_notification_listener');
     }
 
-    public function testThatLogRecordIsSendViaNotifier(): void
+    public function testThatALogRecordIsSendViaNotifier(): void
     {
         // Arrange
         $logMessage = 'An error occurred. Please send the message via the notifier component';
@@ -47,9 +47,24 @@ final class NotifierWriterTest extends FunctionalTestCase
         $events = $this->notificationLoggerListener->getEvents();
         $message = $events->getMessages()[0];
 
-        self::assertSame(
-            $message->getSubject(),
-            $logMessage
-        );
+        self::assertSame($logMessage, $message->getSubject());
+    }
+
+    public function testThatLogRecordWithExceptionContextIsSendViaNotifier(): void
+    {
+        // Arrange
+        $logMessage = 'An error occurred. Please send the message via the notifier component';
+        $exception = new \RuntimeException('An exception was thrown');
+
+        // Act
+        $this->loggerService->logError($logMessage, [
+            'exception' => $exception,
+        ]);
+
+        // Assert
+        $events = $this->notificationLoggerListener->getEvents();
+        $message = $events->getMessages()[0];
+
+        self::assertSame('RuntimeException: ' . $exception->getMessage(), $message->getSubject());
     }
 }
