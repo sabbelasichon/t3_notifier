@@ -49,11 +49,32 @@ final class SomeController extends ActionController
 
 This would send a new notification to the chat channel via the slack transport.
 
-## BrowserChannel
-
 ## LogWriter
 The extension ships with a custom LogWriter to send LogRecords via the Notifier.
-In order to configure
+In order to use the LogWriter you can configure it i.e. via ext_localconf.php
 
+```php
+use Ssch\T3Notifier\Logger\Writer\NotifierWriter;
+use Symfony\Component\Notifier\Recipient\Recipient;
+use TYPO3\CMS\Core\Log\LogLevel;
+
+$GLOBALS['TYPO3_CONF_VARS']['LOG']['Examples']['writerConfiguration'] = [
+    LogLevel::ERROR => [
+        NotifierWriter::class => [
+             // Optional configuration
+            'channels' => ['chat/slack']
+            'recipients' => [new Recipient('max.mustermann@domain.com', '123455678')],
+        ],
+    ],
+];
+```
+
+If you don´t pass the channels option, you have to configure your channel_policy.
+The PSR-3 LogLevel will be translated to the importance level for the Notification.
+I.e. if you would call $this->logger->error it would be translated to the importance level of high.
+
+## BrowserChannel
+[tbd]
 
 ## EmailNotification
+[tbd]
