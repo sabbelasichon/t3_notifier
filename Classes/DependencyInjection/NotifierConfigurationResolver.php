@@ -31,11 +31,13 @@ final class NotifierConfigurationResolver
 
     private function configureDefaultOptions(OptionsResolver $resolver): void
     {
-        $resolver->setDefault('notification_on_failed_messages', false);
+        $resolver
+            ->setDefault('notification_on_failed_messages', false)
+            ->setAllowedTypes('notification_on_failed_messages', 'bool');
+
         $resolver->setDefault('chatter_transports', []);
         $resolver->setDefault('texter_transports', []);
         $resolver->setDefault('channel_policy', []);
-        $resolver->setAllowedTypes('notification_on_failed_messages', 'bool');
 
         $resolver->setDefault('admin_recipients', function (OptionsResolver $adminRecipientsResolver) {
             $adminRecipientsResolver->setPrototype(true)
