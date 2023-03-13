@@ -4,7 +4,7 @@ Integrates Symfony Notifier into TYPO3
 
 ## Integration guide
 The extension basically provides the same functionality as if you would use the notifier in the Symfony Framework.
-In order to configure the messenger you have to put a Notifier.php file under the Configuration folder of an extension.
+In order to configure the notifier you have to put a Notifier.php file under the Configuration folder of an extension.
 
 ```php
 
