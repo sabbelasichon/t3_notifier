@@ -62,4 +62,9 @@ CODE_SAMPLE;
     ],);
 
     $ecsConfig->sets([SetList::PSR_12, SetList::SYMPLIFY, SetList::COMMON, SetList::CLEAN_CODE]);
+
+    $ecsConfig->skip([
+        DeclareStrictTypesFixer::class => [__DIR__ . '/**/ext_localconf.php'],
+        HeaderCommentFixer::class => [__DIR__ . '/**/ext_localconf.php'],
+    ]);
 };
