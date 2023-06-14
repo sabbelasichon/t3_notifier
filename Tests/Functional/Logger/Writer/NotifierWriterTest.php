@@ -17,19 +17,17 @@ use TYPO3\TestingFramework\Core\Functional\FunctionalTestCase;
 
 final class NotifierWriterTest extends FunctionalTestCase
 {
-    protected $initializeDatabase = false;
-
-    protected $testExtensionsToLoad = [
-        'typo3conf/ext/t3_notifier',
-        'typo3conf/ext/t3_notifier/Tests/Functional/Fixtures/Extensions/t3_notifier_test',
-    ];
-
     private LoggerService $loggerService;
 
     private NotificationLoggerListener $notificationLoggerListener;
 
     protected function setUp(): void
     {
+        $this->initializeDatabase = false;
+        $this->testExtensionsToLoad = [
+            'typo3conf/ext/t3_notifier',
+            'typo3conf/ext/t3_notifier/Tests/Functional/Fixtures/Extensions/t3_notifier_test',
+        ];
         parent::setUp();
         $this->loggerService = $this->get(LoggerService::class);
         $this->notificationLoggerListener = $this->get('notifier.logger_notification_listener');
