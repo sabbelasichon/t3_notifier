@@ -169,18 +169,30 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
 
     $containerConfigurator->import(__DIR__ . '/Services/Transports.php');
 
-    // Compiler passes
-    $registerListenersPass = new RegisterListenersPass();
-    if (class_exists(ConsoleEvents::class) && method_exists($registerListenersPass, 'setNoPreloadEvents')) {
-        $registerListenersPass->setNoPreloadEvents([
-            ConsoleEvents::COMMAND,
-            ConsoleEvents::TERMINATE,
-            ConsoleEvents::ERROR,
-        ]);
+    $shouldAddRegisterListenersPass = true;
+    $beforeRemovingPasses = $containerBuilder->getCompilerPassConfig()
+        ->getBeforeRemovingPasses();
+    foreach ($beforeRemovingPasses as $beforeRemovingPass) {
+        if ($beforeRemovingPass instanceof RegisterListenersPass) {
+            $shouldAddRegisterListenersPass = false;
+            break;
+        }
     }
 
-    // must be registered before removing private services as some might be listeners/subscribers
-    // but as late as possible to get resolved parameters
-    $containerBuilder->addCompilerPass($registerListenersPass, PassConfig::TYPE_BEFORE_REMOVING);
+    if ($shouldAddRegisterListenersPass) {
+        // Compiler passes
+        $registerListenersPass = new RegisterListenersPass();
+        if (class_exists(ConsoleEvents::class) && method_exists($registerListenersPass, 'setNoPreloadEvents')) {
+            $registerListenersPass->setNoPreloadEvents([
+                ConsoleEvents::COMMAND,
+                ConsoleEvents::TERMINATE,
+                ConsoleEvents::ERROR,
+            ]);
+        }
+        // must be registered before removing private services as some might be listeners/subscribers
+        // but as late as possible to get resolved parameters
+        $containerBuilder->addCompilerPass($registerListenersPass, PassConfig::TYPE_BEFORE_REMOVING);
+    }
+
     $containerBuilder->addCompilerPass(new NotifierCompilerPass(new NotifierConfigurationResolver()));
 };
