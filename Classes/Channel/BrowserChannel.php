@@ -14,6 +14,7 @@ namespace Ssch\T3Notifier\Channel;
 use Symfony\Component\Notifier\Channel\ChannelInterface;
 use Symfony\Component\Notifier\Notification\Notification;
 use Symfony\Component\Notifier\Recipient\RecipientInterface;
+use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
@@ -21,10 +22,10 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 final class BrowserChannel implements ChannelInterface
 {
     private const MAP_NOTIFICATION_IMPORTANCE = [
-        Notification::IMPORTANCE_HIGH => FlashMessage::WARNING,
-        Notification::IMPORTANCE_MEDIUM => FlashMessage::OK,
-        Notification::IMPORTANCE_URGENT => FlashMessage::ERROR,
-        Notification::IMPORTANCE_LOW => FlashMessage::INFO,
+        Notification::IMPORTANCE_HIGH => AbstractMessage::WARNING,
+        Notification::IMPORTANCE_MEDIUM => AbstractMessage::OK,
+        Notification::IMPORTANCE_URGENT => AbstractMessage::ERROR,
+        Notification::IMPORTANCE_LOW => AbstractMessage::INFO,
     ];
 
     private FlashMessageService $flashMessageService;
