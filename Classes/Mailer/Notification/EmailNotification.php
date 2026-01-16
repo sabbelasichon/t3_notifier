@@ -18,13 +18,12 @@ use Symfony\Component\Notifier\Notification\EmailNotificationInterface;
 use Symfony\Component\Notifier\Notification\Notification;
 use Symfony\Component\Notifier\Recipient\EmailRecipientInterface;
 use TYPO3\CMS\Core\Mail\FluidEmail;
-use TYPO3\CMS\Core\Mail\MailMessage;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MailUtility;
 
 final class EmailNotification extends Notification implements EmailNotificationInterface
 {
-    public function asEmailMessage(EmailRecipientInterface $recipient, string $transport = null): ?EmailMessage
+    public function asEmailMessage(EmailRecipientInterface $recipient, string $transport = null): EmailMessage
     {
         if ($recipient->getEmail() === '') {
             throw new InvalidArgumentException(sprintf('"%s" needs an email, it cannot be empty.', __CLASS__));
@@ -36,23 +35,15 @@ final class EmailNotification extends Notification implements EmailNotificationI
             $body = $this->getSubject();
         }
 
-        if (! class_exists(FluidEmail::class)) {
-            $email = GeneralUtility::makeInstance(MailMessage::class);
-            $email->to($recipient->getEmail())
-                ->subject($this->getSubject())
-                ->text($body)
-            ;
-        } else {
-            $email = GeneralUtility::makeInstance(FluidEmail::class);
-            $email
-                ->assignMultiple([
-                    'headline' => $this->getSubject(),
-                    'introduction' => $body,
-                ])
-                ->to($recipient->getEmail())
-                ->subject($this->getSubject())
-                ->text($body);
-        }
+        $email = GeneralUtility::makeInstance(FluidEmail::class);
+        $email
+            ->assignMultiple([
+                'headline' => $this->getSubject(),
+                'introduction' => $body,
+            ])
+            ->to($recipient->getEmail())
+            ->subject($this->getSubject())
+            ->text($body);
 
         // Ensure to always have a From: header set
         if ($email->getFrom() === []) {

@@ -14,18 +14,18 @@ namespace Ssch\T3Notifier\Channel;
 use Symfony\Component\Notifier\Channel\ChannelInterface;
 use Symfony\Component\Notifier\Notification\Notification;
 use Symfony\Component\Notifier\Recipient\RecipientInterface;
-use TYPO3\CMS\Core\Messaging\AbstractMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessage;
 use TYPO3\CMS\Core\Messaging\FlashMessageService;
+use TYPO3\CMS\Core\Type\ContextualFeedbackSeverity;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
 
 final class BrowserChannel implements ChannelInterface
 {
     private const MAP_NOTIFICATION_IMPORTANCE = [
-        Notification::IMPORTANCE_HIGH => AbstractMessage::WARNING,
-        Notification::IMPORTANCE_MEDIUM => AbstractMessage::OK,
-        Notification::IMPORTANCE_URGENT => AbstractMessage::ERROR,
-        Notification::IMPORTANCE_LOW => AbstractMessage::INFO,
+        Notification::IMPORTANCE_HIGH => ContextualFeedbackSeverity::WARNING,
+        Notification::IMPORTANCE_MEDIUM => ContextualFeedbackSeverity::OK,
+        Notification::IMPORTANCE_URGENT => ContextualFeedbackSeverity::ERROR,
+        Notification::IMPORTANCE_LOW => ContextualFeedbackSeverity::INFO,
     ];
 
     private FlashMessageService $flashMessageService;
@@ -45,7 +45,7 @@ final class BrowserChannel implements ChannelInterface
             $message = $notification->getEmoji() . ' ' . $message;
         }
 
-        $severity = self::MAP_NOTIFICATION_IMPORTANCE[$notification->getImportance()] ?? FlashMessage::INFO;
+        $severity = self::MAP_NOTIFICATION_IMPORTANCE[$notification->getImportance()] ?? ContextualFeedbackSeverity::OK;
 
         $this->flashMessageService->getMessageQueueByIdentifier('notifier.template.flashMessages')
             ->addMessage(

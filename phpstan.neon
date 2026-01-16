@@ -1,7 +1,6 @@
 parameters:
   editorUrl: 'phpstorm://open?file=%%file%%&line=%%line%%'
   level: 8
-  checkGenericClassInNonGenericObjectType: false
   paths:
     - Classes
     - Tests

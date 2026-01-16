@@ -21,7 +21,7 @@ use TYPO3\CMS\Core\Utility\GeneralUtility;
 final class NotifierWriter implements WriterInterface
 {
     /**
-     * @var string[]
+     * @var list<string>
      */
     private array $channels;
 
@@ -33,7 +33,7 @@ final class NotifierWriter implements WriterInterface
     private NotifierInterface $notifier;
 
     /**
-     * @param array{"channels"?: string[], "recipients"?: RecipientInterface[]} $options
+     * @param array{"channels"?: list<string>, "recipients"?: RecipientInterface[]} $options
      */
     public function __construct(array $options = [], NotifierInterface $notifier = null)
     {
@@ -42,7 +42,7 @@ final class NotifierWriter implements WriterInterface
         $this->recipients = $options['recipients'] ?? [];
     }
 
-    public function writeLog(LogRecord $record)
+    public function writeLog(LogRecord $record): self
     {
         $context = $record->getData();
         $message = $record->getMessage();

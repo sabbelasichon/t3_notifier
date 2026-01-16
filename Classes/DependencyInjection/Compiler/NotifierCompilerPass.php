@@ -74,12 +74,10 @@ use Symfony\Component\Notifier\Recipient\Recipient;
 use Symfony\Component\Notifier\TexterInterface;
 use Symfony\Component\Notifier\Transport\TransportFactoryInterface;
 use TYPO3\CMS\Core\Core\Bootstrap;
-use TYPO3\CMS\Core\Information\Typo3Version;
 use TYPO3\CMS\Core\Log\Logger;
 use TYPO3\CMS\Core\Log\LogManager;
 use TYPO3\CMS\Core\Package\PackageManager;
 use TYPO3\CMS\Core\Utility\ExtensionManagementUtility;
-use TYPO3\CMS\Core\Utility\GeneralUtility;
 use TYPO3\CMS\Core\Utility\MailUtility;
 
 final class NotifierCompilerPass implements CompilerPassInterface
@@ -233,15 +231,9 @@ final class NotifierCompilerPass implements CompilerPassInterface
 
     private function collectNotifierConfigurationsFromPackages(): array
     {
-        $versionInformation = GeneralUtility::makeInstance(Typo3Version::class);
-        if ($versionInformation->getMajorVersion() >= 11) {
-            $coreCache = Bootstrap::createCache('core');
-            $packageCache = Bootstrap::createPackageCache($coreCache);
-            $packageManager = Bootstrap::createPackageManager(PackageManager::class, $packageCache);
-        } else {
-            $coreCache = Bootstrap::createCache('core');
-            $packageManager = Bootstrap::createPackageManager(PackageManager::class, $coreCache);
-        }
+        $coreCache = Bootstrap::createCache('core');
+        $packageCache = Bootstrap::createPackageCache($coreCache);
+        $packageManager = Bootstrap::createPackageManager(PackageManager::class, $packageCache);
         ExtensionManagementUtility::setPackageManager($packageManager);
 
         $config = (new NotifierConfigurationCollector($packageManager))->collect();
