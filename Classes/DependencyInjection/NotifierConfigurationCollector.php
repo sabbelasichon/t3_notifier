@@ -23,6 +23,9 @@ final class NotifierConfigurationCollector
         $this->packageManager = $packageManager;
     }
 
+    /**
+     * @return \ArrayObject<int, mixed>
+     */
     public function collect(): \ArrayObject
     {
         $configPackages = ['Configuration/Notifier.php'];

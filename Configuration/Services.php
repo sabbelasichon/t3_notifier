@@ -6,7 +6,7 @@ declare(strict_types=1);
  * This file is part of the "t3_notifier" Extension for TYPO3 CMS.
  *
  * For the full copyright and license information, please read the
- * LICENSE.txt file that was distributed with this source code.
+ * LICENSE.md file that was distributed with this source code.
  */
 
 use Ssch\T3Notifier\Channel\BrowserChannel;
@@ -39,7 +39,6 @@ use Symfony\Component\Notifier\Texter;
 use Symfony\Component\Notifier\TexterInterface;
 use Symfony\Component\Notifier\Transport;
 use Symfony\Component\Notifier\Transport\Transports;
-use TYPO3\CMS\Core\Mail\Mailer;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\service;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_iterator;
 use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_locator;
@@ -64,11 +63,7 @@ return static function (ContainerConfigurator $containerConfigurator, ContainerB
 
     $services->set('event_dispatcher', EventDispatcher::class);
 
-    if (interface_exists(\TYPO3\CMS\Core\Mail\MailerInterface::class)) {
-        $services->set('mailer', \TYPO3\CMS\Core\Mail\MailerInterface::class);
-    } else {
-        $services->set('mailer', Mailer::class);
-    }
+    $services->set('mailer', \TYPO3\CMS\Core\Mail\MailerInterface::class);
 
     $services->set('notifier', Notifier::class)
         ->args([tagged_locator('notifier.channel', 'channel'), service('notifier.channel_policy')->ignoreOnInvalid()])
