@@ -93,7 +93,7 @@ final class NotifierCompilerPass implements CompilerPassInterface
     {
         $config = $this->collectNotifierConfigurationsFromPackages();
 
-        if (count($config) === 0) {
+        if (0 === count($config)) {
             return;
         }
 

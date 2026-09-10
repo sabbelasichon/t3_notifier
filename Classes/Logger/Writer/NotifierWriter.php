@@ -46,7 +46,7 @@ final class NotifierWriter implements WriterInterface
     {
         $context = $record->getData();
         $message = $record->getMessage();
-        if ($context !== []) {
+        if ([] !== $context) {
             if (isset($context['exception']) && $context['exception'] instanceof \Throwable) {
                 $notification = Notification::fromThrowable($context['exception']);
             } else {
@@ -61,7 +61,7 @@ final class NotifierWriter implements WriterInterface
         $notification->channels($this->channels);
 
         $recipients = $this->recipients;
-        if ($recipients === [] && method_exists($this->notifier, 'getAdminRecipients')) {
+        if ([] === $recipients && method_exists($this->notifier, 'getAdminRecipients')) {
             $recipients = $this->notifier->getAdminRecipients();
         }
 

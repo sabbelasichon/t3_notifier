@@ -25,11 +25,11 @@ final class EmailNotification extends Notification implements EmailNotificationI
 {
     public function asEmailMessage(EmailRecipientInterface $recipient, ?string $transport = null): EmailMessage
     {
-        if ($recipient->getEmail() === '') {
+        if ('' === $recipient->getEmail()) {
             throw new InvalidArgumentException(sprintf('"%s" needs an email, it cannot be empty.', __CLASS__));
         }
 
-        if ($this->getContent() !== '') {
+        if ('' !== $this->getContent()) {
             $body = $this->getContent();
         } else {
             $body = $this->getSubject();
@@ -46,11 +46,11 @@ final class EmailNotification extends Notification implements EmailNotificationI
             ->text($body);
 
         // Ensure to always have a From: header set
-        if ($email->getFrom() === []) {
+        if ([] === $email->getFrom()) {
             $address = MailUtility::getSystemFromAddress();
-            if ($address !== '') {
+            if ('' !== $address) {
                 $name = MailUtility::getSystemFromName();
-                if (is_string($name) && $name !== '') {
+                if (is_string($name) && '' !== $name) {
                     $from = new Address($address, $name);
                 } else {
                     $from = new Address($address);
@@ -58,11 +58,11 @@ final class EmailNotification extends Notification implements EmailNotificationI
                 $email->from($from);
             }
         }
-        if ($email->getReplyTo() === []) {
+        if ([] === $email->getReplyTo()) {
             $replyTo = MailUtility::getSystemReplyTo();
-            if ($replyTo !== []) {
+            if ([] !== $replyTo) {
                 $address = key($replyTo);
-                if ($address === 0) {
+                if (0 === $address) {
                     $replyTo = new Address($replyTo[$address]);
                 } else {
                     $replyTo = new Address((string) $address, reset($replyTo));

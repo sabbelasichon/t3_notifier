@@ -43,10 +43,10 @@ final class NotifierConfigurationResolver
             $adminRecipientsResolver->setPrototype(true)
                 ->setRequired('email')
                 ->setAllowedValues('email', function ($email) {
-                    if ($email === null) {
+                    if (null === $email) {
                         return false;
                     }
-                    if ($email === '') {
+                    if ('' === $email) {
                         return false;
                     }
 

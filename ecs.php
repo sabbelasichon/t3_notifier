@@ -21,50 +21,37 @@ use Symplify\CodingStandard\Fixer\LineLength\LineLengthFixer;
 use Symplify\EasyCodingStandard\Config\ECSConfig;
 use Symplify\EasyCodingStandard\ValueObject\Set\SetList;
 
-return static function (ECSConfig $ecsConfig): void {
-    $header = <<<CODE_SAMPLE
+$header = <<<CODE_SAMPLE
 This file is part of the "t3_notifier" Extension for TYPO3 CMS.
 
 For the full copyright and license information, please read the
 LICENSE.md file that was distributed with this source code.
 CODE_SAMPLE;
 
-    $ecsConfig->paths([
-        __DIR__ . '/Classes',
-        __DIR__ . '/Tests',
-        __DIR__ . '/Configuration',
-        __DIR__ . '/ecs.php',
-    ]);
-
-    $ecsConfig->ruleWithConfiguration(ArraySyntaxFixer::class, [
+return ECSConfig::configure()
+    ->withPaths([__DIR__ . '/Classes', __DIR__ . '/Tests', __DIR__ . '/Configuration', __DIR__ . '/ecs.php'])
+    ->withRules([
+        DeclareStrictTypesFixer::class,
+        LineLengthFixer::class,
+        YodaStyleFixer::class,
+        StandaloneLineInMultilineArrayFixer::class,
+        ArrayOpenerAndCloserNewlineFixer::class,
+    ])
+    ->withConfiguredRule(ArraySyntaxFixer::class, [
         'syntax' => 'short',
-    ]);
-    $ecsConfig->rule(DeclareStrictTypesFixer::class);
-    $ecsConfig->rule(LineLengthFixer::class);
-    $ecsConfig->rule(YodaStyleFixer::class);
-    $ecsConfig->ruleWithConfiguration(HeaderCommentFixer::class, [
+    ])
+    ->withConfiguredRule(HeaderCommentFixer::class, [
         'header' => $header,
         'separate' => 'both',
-    ]);
-
-    $ecsConfig->rule(StandaloneLineInMultilineArrayFixer::class);
-    $ecsConfig->rule(ArrayOpenerAndCloserNewlineFixer::class);
-
-    $ecsConfig->ruleWithConfiguration(
-        GeneralPhpdocAnnotationRemoveFixer::class,
-        [
-            'annotations' => ['throws', 'author', 'package', 'group'],
-        ],
-    );
-
-    $ecsConfig->ruleWithConfiguration(NoSuperfluousPhpdocTagsFixer::class, [
+    ])
+    ->withConfiguredRule(GeneralPhpdocAnnotationRemoveFixer::class, [
+        'annotations' => ['throws', 'author', 'package', 'group'],
+    ])
+    ->withConfiguredRule(NoSuperfluousPhpdocTagsFixer::class, [
         'allow_mixed' => true,
-    ],);
-
-    $ecsConfig->sets([SetList::PSR_12, SetList::SYMPLIFY, SetList::COMMON, SetList::CLEAN_CODE]);
-
-    $ecsConfig->skip([
+    ])
+    ->withSets([SetList::PSR_12, SetList::COMMON, SetList::CLEAN_CODE])
+    ->withSkip([
         DeclareStrictTypesFixer::class => [__DIR__ . '/**/ext_localconf.php'],
         HeaderCommentFixer::class => [__DIR__ . '/**/ext_localconf.php'],
     ]);
-};
