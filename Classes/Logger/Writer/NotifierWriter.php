@@ -35,7 +35,7 @@ final class NotifierWriter implements WriterInterface
     /**
      * @param array{"channels"?: list<string>, "recipients"?: RecipientInterface[]} $options
      */
-    public function __construct(array $options = [], NotifierInterface $notifier = null)
+    public function __construct(array $options = [], ?NotifierInterface $notifier = null)
     {
         $this->notifier = $notifier ?? GeneralUtility::getContainer()->get('notifier');
         $this->channels = $options['channels'] ?? [];

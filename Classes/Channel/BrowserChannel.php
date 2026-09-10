@@ -38,7 +38,7 @@ final class BrowserChannel implements ChannelInterface
     public function notify(
         Notification $notification,
         RecipientInterface $recipient,
-        string $transportName = null
+        ?string $transportName = null
     ): void {
         $message = $notification->getSubject();
         if ($notification->getEmoji() !== '') {

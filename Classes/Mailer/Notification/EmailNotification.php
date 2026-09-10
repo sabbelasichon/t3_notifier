@@ -23,7 +23,7 @@ use TYPO3\CMS\Core\Utility\MailUtility;
 
 final class EmailNotification extends Notification implements EmailNotificationInterface
 {
-    public function asEmailMessage(EmailRecipientInterface $recipient, string $transport = null): EmailMessage
+    public function asEmailMessage(EmailRecipientInterface $recipient, ?string $transport = null): EmailMessage
     {
         if ($recipient->getEmail() === '') {
             throw new InvalidArgumentException(sprintf('"%s" needs an email, it cannot be empty.', __CLASS__));
